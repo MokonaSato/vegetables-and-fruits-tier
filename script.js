@@ -468,25 +468,27 @@ function drawElementBox(context, element) {
     return;
   }
 
-  const style = window.getComputedStyle(element);
-  const radius = Math.min(parsePixel(style.borderTopLeftRadius), rect.width / 2, rect.height / 2);
-  const backgroundColor = style.backgroundColor;
-  const shadow = parseBoxShadow(style.boxShadow);
+  withOverflowClip(context, element, () => {
+    const style = window.getComputedStyle(element);
+    const radius = Math.min(parsePixel(style.borderTopLeftRadius), rect.width / 2, rect.height / 2);
+    const backgroundColor = style.backgroundColor;
+    const shadow = parseBoxShadow(style.boxShadow);
 
-  if (!isTransparent(backgroundColor)) {
-    context.save();
-    if (shadow) {
-      context.shadowColor = shadow.color;
-      context.shadowBlur = shadow.blur;
-      context.shadowOffsetX = shadow.offsetX;
-      context.shadowOffsetY = shadow.offsetY;
+    if (!isTransparent(backgroundColor)) {
+      context.save();
+      if (shadow) {
+        context.shadowColor = shadow.color;
+        context.shadowBlur = shadow.blur;
+        context.shadowOffsetX = shadow.offsetX;
+        context.shadowOffsetY = shadow.offsetY;
+      }
+      context.fillStyle = backgroundColor;
+      fillRoundRect(context, rect.left, rect.top, rect.width, rect.height, radius);
+      context.restore();
     }
-    context.fillStyle = backgroundColor;
-    fillRoundRect(context, rect.left, rect.top, rect.width, rect.height, radius);
-    context.restore();
-  }
 
-  drawElementBorder(context, rect, style, radius);
+    drawElementBorder(context, rect, style, radius);
+  });
 }
 
 function drawElementBorder(context, rect, style, radius) {
@@ -604,9 +606,11 @@ function drawWrappedElementText(context, element, options = {}) {
         ? rect.right - paddingRight
         : rect.left + paddingLeft;
 
-  context.textAlign = align === "center" || align === "right" ? align : "left";
-  lines.forEach((line, index) => {
-    context.fillText(line, x, startY + index * lineHeight);
+  withOverflowClip(context, element, () => {
+    context.textAlign = align === "center" || align === "right" ? align : "left";
+    lines.forEach((line, index) => {
+      context.fillText(line, x, startY + index * lineHeight);
+    });
   });
 }
 
@@ -615,9 +619,11 @@ function drawTextLine(context, text, element, x, y, options = {}) {
     return;
   }
 
-  applyTextStyle(context, window.getComputedStyle(element));
-  context.textAlign = options.align || "left";
-  context.fillText(text, x, y);
+  withOverflowClip(context, element, () => {
+    applyTextStyle(context, window.getComputedStyle(element));
+    context.textAlign = options.align || "left";
+    context.fillText(text, x, y);
+  });
 }
 
 function applyTextStyle(context, style) {
@@ -678,6 +684,31 @@ function roundRectPath(context, x, y, width, height, radius) {
   context.lineTo(x, y + safeRadius);
   context.quadraticCurveTo(x, y, x + safeRadius, y);
   context.closePath();
+}
+
+function withOverflowClip(context, element, callback) {
+  context.save();
+  clipOverflowAncestors(context, element);
+  callback();
+  context.restore();
+}
+
+function clipOverflowAncestors(context, element) {
+  let ancestor = element.parentElement;
+
+  while (ancestor && !ancestor.classList.contains("snapshot-target")) {
+    const style = window.getComputedStyle(ancestor);
+    const clipsOverflow = style.overflowX !== "visible" || style.overflowY !== "visible";
+
+    if (clipsOverflow) {
+      const rect = ancestor.getBoundingClientRect();
+      const radius = Math.min(parsePixel(style.borderTopLeftRadius), rect.width / 2, rect.height / 2);
+      roundRectPath(context, rect.left, rect.top, rect.width, rect.height, radius);
+      context.clip();
+    }
+
+    ancestor = ancestor.parentElement;
+  }
 }
 
 function parseBoxShadow(value) {
