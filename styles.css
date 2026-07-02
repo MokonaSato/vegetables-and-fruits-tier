@@ -418,13 +418,13 @@ h1 {
   top: 0;
   left: -10000px;
   z-index: -1;
-  width: 1120px;
+  width: 554px;
   overflow: hidden;
   pointer-events: none;
 }
 
 .snapshot-target {
-  width: 1120px;
+  width: 554px;
 }
 
 .snapshot-target .app-header,
@@ -441,21 +441,21 @@ h1 {
 }
 
 .snapshot-target .tier-row {
-  grid-template-columns: 84px 1fr;
-  height: 88px;
-  min-height: 88px;
+  grid-template-columns: 70px 1fr;
+  height: 239.5px;
+  min-height: 239.5px;
   overflow: hidden;
 }
 
 .snapshot-target .items {
-  padding: 11px 15px;
+  padding: 12px;
   overflow: hidden;
 }
 
 .snapshot-target .chip {
-  min-height: 31px;
-  padding: 3px 13px;
-  font-size: 16px;
+  min-height: 30px;
+  padding: 3px 11px;
+  font-size: 15px;
 }
 
 .snapshot-target .tier-guide-title {

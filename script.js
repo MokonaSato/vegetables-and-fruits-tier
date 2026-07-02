@@ -6,9 +6,9 @@ const filters = Array.from(document.querySelectorAll("[data-filter]"));
 const zones = Array.from(document.querySelectorAll(".items, .pool-items"));
 const tierRows = Array.from(document.querySelectorAll(".tier-row"));
 const pool = document.querySelector(".pool");
-const SNAPSHOT_WIDTH = 1120;
-const SNAPSHOT_TABLE_WIDTH = 1106;
-const SNAPSHOT_TABLE_HEIGHT = 354;
+const SNAPSHOT_TABLE_WIDTH = 540;
+const SNAPSHOT_TABLE_HEIGHT = 960;
+const SNAPSHOT_WIDTH = SNAPSHOT_TABLE_WIDTH + 14;
 const SNAPSHOT_SCALE = 2;
 
 const fruitNames = new Set([
