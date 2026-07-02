@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>野菜・果物 Tier 表</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+  <main class="page">
+    <section class="tier-app" aria-label="野菜・果物 Tier 表アプリ">
+      <header class="app-header">
+        <div>
+          <h1><span aria-hidden="true">🥦🍎</span> 野菜・果物 Tier 表</h1>
+          <p class="legend">
+            <span><i class="dot vegetable"></i>野菜</span>
+            <span><i class="dot fruit"></i>果物</span>
+            <span><i class="dot mushroom"></i>きのこ</span>
+            <span>ー ドラッグ or クリックで移動</span>
+          </p>
+        </div>
+        <div class="actions">
+          <button class="button secondary" type="button" data-action="reset">↻ リセット</button>
+          <button class="button primary" type="button" data-action="save">↓ 画像保存</button>
+        </div>
+      </header>
+
+      <div class="tier-board">
+        <div class="tier-row tier-s">
+          <div class="tier-label">
+            <strong>S</strong>
+            <span>Suki!</span>
+          </div>
+          <div class="items">
+            <span class="chip">🌽 とうもろこし</span>
+            <span class="chip">🥑 アボカド</span>
+            <span class="chip">🥔 じゃがいも</span>
+            <span class="chip">🍠 さつまいも</span>
+            <span class="chip">🫛 えだまめ</span>
+            <span class="chip">🟡 かぼちゃ</span>
+            <span class="chip">🌰 栗</span>
+            <span class="chip">🍎 りんご</span>
+            <span class="chip">🍊 みかん</span>
+            <span class="chip">🍇 ぶどう</span>
+            <span class="chip">🍓 いちご</span>
+            <span class="chip">🍑 もも</span>
+            <span class="chip">🍒 さくらんぼ</span>
+            <span class="chip">🍐 なし</span>
+            <span class="chip">🍌 バナナ</span>
+            <span class="chip">🍍 パイナップル</span>
+            <span class="chip">🥭 マンゴー</span>
+            <span class="chip">🥝 キウイ</span>
+          </div>
+        </div>
+
+        <div class="tier-row tier-a">
+          <div class="tier-label">
+            <strong>A</strong>
+            <span>Able</span>
+          </div>
+          <div class="items">
+            <span class="chip">🟢 グリーンピース</span>
+            <span class="chip">🫚 しょうが</span>
+            <span class="chip">🟤 やまいも</span>
+            <span class="chip">🌿 さといも</span>
+            <span class="chip">🍉 すいか</span>
+            <span class="chip">🍈 メロン</span>
+            <span class="chip">🟠 グレープフルーツ</span>
+            <span class="chip">🍋 ゆず</span>
+            <span class="chip">🍑 あんず</span>
+            <span class="chip">🟠 柿</span>
+            <span class="chip">🧄 にんにく</span>
+            <span class="chip">🫘 そら豆</span>
+          </div>
+        </div>
+
+        <div class="tier-row tier-b">
+          <div class="tier-label">
+            <strong>B</strong>
+            <span>Bad</span>
+          </div>
+          <div class="items">
+            <span class="chip">🥕 にんじん</span>
+            <span class="chip">🍋 レモン</span>
+            <span class="chip">🧅 たまねぎ</span>
+            <span class="chip">🥬 キャベツ</span>
+            <span class="chip">🥬 レタス</span>
+            <span class="chip">🌿 れんこん</span>
+            <span class="chip">🥢 ごぼう</span>
+            <span class="chip">⬜ 大根</span>
+            <span class="chip">🥝 ニラ</span>
+            <span class="chip">🌿 ねぎ</span>
+            <span class="chip">🥬 はくさい</span>
+            <span class="chip">○ かぶ</span>
+          </div>
+        </div>
+
+        <div class="tier-row tier-c">
+          <div class="tier-label">
+            <strong>C</strong>
+            <span>Cannot</span>
+          </div>
+          <div class="items">
+            <span class="chip">🌿 ほうれん草</span>
+            <span class="chip">🍆 なす</span>
+            <span class="chip">🌱 もやし</span>
+            <span class="chip">🫑 パプリカ</span>
+            <span class="chip">🌶️ ピーマン</span>
+            <span class="chip">🥒 ゴーヤ</span>
+            <span class="chip">🌿 アスパラガス</span>
+            <span class="chip">🌸 カリフラワー</span>
+          </div>
+        </div>
+
+        <div class="tier-row tier-d">
+          <div class="tier-label">
+            <strong>D</strong>
+            <span>Dead</span>
+          </div>
+          <div class="items">
+            <span class="chip">🥒 きゅうり</span>
+            <span class="chip">🍅 トマト</span>
+            <span class="chip">🥦 ブロッコリー</span>
+            <span class="chip">🌾 セロリ</span>
+          </div>
+        </div>
+      </div>
+
+      <footer class="pool" aria-label="未配置の食材">
+        <div class="pool-toolbar">
+          <div class="filters">
+            <button class="filter active" type="button" data-filter="all">すべて</button>
+            <button class="filter" type="button" data-filter="vegetable">🥦 野菜</button>
+            <button class="filter" type="button" data-filter="fruit">🍎 果物</button>
+            <button class="filter" type="button" data-filter="mushroom">🌸 きのこ</button>
+            <button class="filter" type="button" data-filter="placed">配置済み</button>
+          </div>
+          <button class="add" type="button" data-action="add">＋ 追加</button>
+        </div>
+        <div class="pool-items">
+          <span class="chip">🌸 菜の花</span>
+          <span class="chip">🫛 さやえんどう</span>
+          <span class="chip">🌿 しゅんぎく</span>
+          <span class="chip">🌿 ちんげんさい</span>
+          <span class="chip">🌿 みずな</span>
+          <span class="chip">🌿 みつば</span>
+          <span class="chip">🌿 パクチー</span>
+          <span class="chip">🍄 しいたけ</span>
+          <span class="chip">🍄 えのき</span>
+          <span class="chip">🍄 まいたけ</span>
+          <span class="chip">🍄 しめじ</span>
+          <span class="chip">🍄 エリンギ</span>
+          <span class="chip">🍄 なめこ</span>
+          <span class="chip">🍄 マッシュルーム</span>
+          <span class="chip">🍄 松茸</span>
+          <span class="chip">🍄 きくらげ</span>
+          <span class="chip">🍄 ぶなしめじ</span>
+          <span class="chip">🫐 さやいんげん</span>
+          <span class="chip">🌿 こまつな</span>
+        </div>
+      </footer>
+
+      <section class="tier-guide" aria-labelledby="tier-guide-title">
+        <div class="tier-guide-card">
+          <h2 class="tier-guide-title" id="tier-guide-title">
+            <span aria-hidden="true">i</span>
+            各段階の説明
+          </h2>
+          <table class="tier-guide-table">
+            <tbody>
+              <tr>
+                <th class="guide-rank guide-s" scope="row">
+                  <strong>S</strong>
+                  <span>Suki</span>
+                </th>
+                <td>自分から積極的に食べる</td>
+              </tr>
+              <tr>
+                <th class="guide-rank guide-a" scope="row">
+                  <strong>A</strong>
+                  <span>Able</span>
+                </th>
+                <td>食事に入ってたら食べることもある。単体でも食べられる</td>
+              </tr>
+              <tr>
+                <th class="guide-rank guide-b" scope="row">
+                  <strong>B</strong>
+                  <span>Bad</span>
+                </th>
+                <td>上司などと食事に行ったときに仕方なく食べることがある。スープなどと一緒なら食べられる</td>
+              </tr>
+              <tr>
+                <th class="guide-rank guide-c" scope="row">
+                  <strong>C</strong>
+                  <span>Cannot</span>
+                </th>
+                <td>上司などと食事に行っても残す。飲み込むことができる</td>
+              </tr>
+              <tr>
+                <th class="guide-rank guide-d" scope="row">
+                  <strong>D</strong>
+                  <span>Dead</span>
+                </th>
+                <td>食べないと他人の命がないと言われたら食べる。自分の命の場合は食べないこともありえる</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </section>
+  </main>
+  <script src="script.js"></script>
+</body>
+
+</html>
