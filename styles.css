@@ -442,10 +442,14 @@ h1 {
 
 .snapshot-target .tier-row {
   grid-template-columns: 84px 1fr;
+  height: 88px;
+  min-height: 88px;
+  overflow: hidden;
 }
 
 .snapshot-target .items {
   padding: 11px 15px;
+  overflow: hidden;
 }
 
 .snapshot-target .chip {

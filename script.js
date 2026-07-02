@@ -7,6 +7,8 @@ const zones = Array.from(document.querySelectorAll(".items, .pool-items"));
 const tierRows = Array.from(document.querySelectorAll(".tier-row"));
 const pool = document.querySelector(".pool");
 const SNAPSHOT_WIDTH = 1120;
+const SNAPSHOT_TABLE_WIDTH = 1106;
+const SNAPSHOT_TABLE_HEIGHT = 354;
 const SNAPSHOT_SCALE = 2;
 
 const fruitNames = new Set([
@@ -304,7 +306,7 @@ function saveAsImage() {
   const snapshot = createSnapshotApp();
 
   try {
-    const canvas = renderAppToCanvas(snapshot.app);
+    const canvas = renderTierTableToCanvas(snapshot.app);
     saveButton.disabled = true;
     saveButton.textContent = "保存中...";
 
@@ -327,6 +329,10 @@ function createSnapshotApp() {
   host.className = "snapshot-host";
   clone.classList.add("snapshot-target");
   clone.style.width = `${SNAPSHOT_WIDTH}px`;
+  clone.querySelector(".tier-d")?.remove();
+  clone.querySelector(".pool")?.remove();
+  clone.querySelector(".tier-guide")?.remove();
+  clone.querySelector(".app-header")?.remove();
   clone.querySelectorAll(".is-selected, .is-dragging, .is-drop-target").forEach((element) => {
     element.classList.remove("is-selected", "is-dragging", "is-drop-target");
   });
@@ -340,18 +346,22 @@ function createSnapshotApp() {
   };
 }
 
-function renderAppToCanvas(sourceApp) {
-  const rect = sourceApp.getBoundingClientRect();
+function renderTierTableToCanvas(sourceApp) {
+  const target = sourceApp.querySelector(".tier-board");
+  const rect = target.getBoundingClientRect();
   const scale = SNAPSHOT_SCALE;
   const canvas = document.createElement("canvas");
   const context = canvas.getContext("2d");
 
-  canvas.width = Math.ceil(rect.width * scale);
-  canvas.height = Math.ceil(rect.height * scale);
+  canvas.width = SNAPSHOT_TABLE_WIDTH * scale;
+  canvas.height = SNAPSHOT_TABLE_HEIGHT * scale;
   context.scale(scale, scale);
   context.translate(-rect.left, -rect.top);
   context.fillStyle = "#ffffff";
-  context.fillRect(rect.left, rect.top, rect.width, rect.height);
+  context.fillRect(rect.left, rect.top, SNAPSHOT_TABLE_WIDTH, SNAPSHOT_TABLE_HEIGHT);
+  context.beginPath();
+  context.rect(rect.left, rect.top, SNAPSHOT_TABLE_WIDTH, SNAPSHOT_TABLE_HEIGHT);
+  context.clip();
 
   drawAppBoxes(context, sourceApp);
   drawAppText(context, sourceApp);
