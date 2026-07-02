@@ -6,6 +6,8 @@ const filters = Array.from(document.querySelectorAll("[data-filter]"));
 const zones = Array.from(document.querySelectorAll(".items, .pool-items"));
 const tierRows = Array.from(document.querySelectorAll(".tier-row"));
 const pool = document.querySelector(".pool");
+const SNAPSHOT_WIDTH = 1120;
+const SNAPSHOT_SCALE = 2;
 
 const fruitNames = new Set([
   "りんご",
@@ -299,9 +301,10 @@ function categoryIcon(category) {
 
 function saveAsImage() {
   const originalSaveText = saveButton.textContent;
+  const snapshot = createSnapshotApp();
 
   try {
-    const canvas = renderAppToCanvas();
+    const canvas = renderAppToCanvas(snapshot.app);
     saveButton.disabled = true;
     saveButton.textContent = "保存中...";
 
@@ -311,14 +314,35 @@ function saveAsImage() {
     console.error(error);
     window.alert("PNG画像の保存に失敗しました。ページを再読み込みしてもう一度お試しください。");
   } finally {
+    snapshot.host.remove();
     saveButton.disabled = false;
     saveButton.textContent = originalSaveText;
   }
 }
 
-function renderAppToCanvas() {
-  const rect = app.getBoundingClientRect();
-  const scale = Math.max(2, window.devicePixelRatio || 1);
+function createSnapshotApp() {
+  const host = document.createElement("div");
+  const clone = app.cloneNode(true);
+
+  host.className = "snapshot-host";
+  clone.classList.add("snapshot-target");
+  clone.style.width = `${SNAPSHOT_WIDTH}px`;
+  clone.querySelectorAll(".is-selected, .is-dragging, .is-drop-target").forEach((element) => {
+    element.classList.remove("is-selected", "is-dragging", "is-drop-target");
+  });
+
+  host.appendChild(clone);
+  document.body.appendChild(host);
+
+  return {
+    host,
+    app: clone
+  };
+}
+
+function renderAppToCanvas(sourceApp) {
+  const rect = sourceApp.getBoundingClientRect();
+  const scale = SNAPSHOT_SCALE;
   const canvas = document.createElement("canvas");
   const context = canvas.getContext("2d");
 
@@ -329,13 +353,13 @@ function renderAppToCanvas() {
   context.fillStyle = "#ffffff";
   context.fillRect(rect.left, rect.top, rect.width, rect.height);
 
-  drawAppBoxes(context);
-  drawAppText(context);
+  drawAppBoxes(context, sourceApp);
+  drawAppText(context, sourceApp);
 
   return canvas;
 }
 
-function drawAppBoxes(context) {
+function drawAppBoxes(context, sourceApp) {
   [
     ".tier-app",
     ".tier-board",
@@ -353,16 +377,16 @@ function drawAppBoxes(context) {
     ".dot",
     ".tier-guide-title span"
   ].forEach((selector) => {
-    document.querySelectorAll(selector).forEach((element) => {
+    querySnapshotElements(sourceApp, selector).forEach((element) => {
       drawElementBox(context, element);
     });
   });
 }
 
-function drawAppText(context) {
-  drawElementText(context, document.querySelector("h1"), { align: "left" });
+function drawAppText(context, sourceApp) {
+  drawElementText(context, querySnapshotElement(sourceApp, "h1"), { align: "left" });
 
-  document.querySelectorAll(".legend span").forEach((element) => {
+  querySnapshotElements(sourceApp, ".legend span").forEach((element) => {
     const dot = element.querySelector(".dot");
     const rect = element.getBoundingClientRect();
     const textStart = dot ? dot.getBoundingClientRect().right + 4 : rect.left;
@@ -371,17 +395,18 @@ function drawAppText(context) {
     });
   });
 
-  document.querySelectorAll(".button, .filter, .add, .chip:not(.is-hidden)").forEach((element) => {
+  querySnapshotElements(sourceApp, ".button, .filter, .add, .chip:not(.is-hidden)").forEach((element) => {
     drawElementText(context, element, { align: "center" });
   });
 
-  document.querySelectorAll(".tier-label strong, .tier-label span, .guide-rank strong, .guide-rank span").forEach(
-    (element) => {
-      drawElementText(context, element, { align: "center" });
-    }
-  );
+  querySnapshotElements(
+    sourceApp,
+    ".tier-label strong, .tier-label span, .guide-rank strong, .guide-rank span"
+  ).forEach((element) => {
+    drawElementText(context, element, { align: "center" });
+  });
 
-  const guideTitle = document.querySelector(".tier-guide-title");
+  const guideTitle = querySnapshotElement(sourceApp, ".tier-guide-title");
   if (guideTitle) {
     const icon = guideTitle.querySelector("span");
     if (icon) {
@@ -399,14 +424,31 @@ function drawAppText(context) {
     drawTextLine(context, text, guideTitle, x, rect.top + rect.height / 2, { align: "left" });
   }
 
-  document.querySelectorAll(".tier-guide-table td").forEach((element) => {
+  querySnapshotElements(sourceApp, ".tier-guide-table td").forEach((element) => {
     drawWrappedElementText(context, element);
   });
 
-  const guideNote = document.querySelector(".tier-guide-note");
+  const guideNote = querySnapshotElement(sourceApp, ".tier-guide-note");
   if (guideNote) {
     drawWrappedElementText(context, guideNote, { align: "center" });
   }
+}
+
+function querySnapshotElement(sourceApp, selector) {
+  if (sourceApp.matches(selector)) {
+    return sourceApp;
+  }
+  return sourceApp.querySelector(selector);
+}
+
+function querySnapshotElements(sourceApp, selector) {
+  const elements = Array.from(sourceApp.querySelectorAll(selector));
+
+  if (sourceApp.matches(selector)) {
+    elements.unshift(sourceApp);
+  }
+
+  return elements;
 }
 
 function drawElementBox(context, element) {
