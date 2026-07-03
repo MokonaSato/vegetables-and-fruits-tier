@@ -383,7 +383,7 @@ function fitSnapshotToContent(sourceApp) {
     const aspectHeight = Math.max(SNAPSHOT_BASE_TABLE_HEIGHT, Math.ceil(tableWidth * SNAPSHOT_ASPECT_HEIGHT / SNAPSHOT_ASPECT_WIDTH));
 
     if (boardHeight <= aspectHeight) {
-      stretchLastSnapshotRow(sourceApp, aspectHeight);
+      distributeSnapshotExtraHeight(sourceApp, aspectHeight);
       return {
         width: tableWidth,
         height: aspectHeight
@@ -412,7 +412,7 @@ function fitSnapshotToContent(sourceApp) {
   setSnapshotTableWidth(sourceApp, finalWidth);
   clearSnapshotRowStretch(sourceApp);
   const finalHeight = Math.max(SNAPSHOT_BASE_TABLE_HEIGHT, Math.ceil(finalWidth * SNAPSHOT_ASPECT_HEIGHT / SNAPSHOT_ASPECT_WIDTH));
-  stretchLastSnapshotRow(sourceApp, finalHeight);
+  distributeSnapshotExtraHeight(sourceApp, finalHeight);
 
   return {
     width: finalWidth,
@@ -430,21 +430,17 @@ function setSnapshotTableWidth(sourceApp, tableWidth) {
 }
 
 function clearSnapshotRowStretch(sourceApp) {
-  const lastRow = sourceApp.querySelector(".tier-d") || sourceApp.querySelector(".tier-row:last-child");
-
-  if (!lastRow) {
-    return;
-  }
-
-  lastRow.style.height = "";
-  lastRow.style.minHeight = "";
+  querySnapshotRows(sourceApp).forEach((row) => {
+    row.style.height = "";
+    row.style.minHeight = "";
+  });
 }
 
-function stretchLastSnapshotRow(sourceApp, targetHeight) {
+function distributeSnapshotExtraHeight(sourceApp, targetHeight) {
   const board = sourceApp.querySelector(".tier-board");
-  const lastRow = sourceApp.querySelector(".tier-d") || sourceApp.querySelector(".tier-row:last-child");
+  const rows = querySnapshotRows(sourceApp);
 
-  if (!board || !lastRow) {
+  if (!board || rows.length === 0) {
     return;
   }
 
@@ -455,8 +451,23 @@ function stretchLastSnapshotRow(sourceApp, targetHeight) {
     return;
   }
 
-  const rowHeight = lastRow.getBoundingClientRect().height;
-  lastRow.style.minHeight = `${rowHeight + extraHeight}px`;
+  const emptyRows = rows.filter((row) => row.querySelectorAll(".chip:not(.is-hidden)").length === 0);
+  const stretchRows = emptyRows.length > 0 ? emptyRows : rows;
+  const extraHeightPerRow = extraHeight / stretchRows.length;
+
+  stretchRows.forEach((row) => {
+    const rowHeight = row.getBoundingClientRect().height;
+    row.style.minHeight = `${rowHeight + extraHeightPerRow}px`;
+  });
+
+  const adjustedHeight = measureSnapshotBoardHeight(sourceApp);
+  const remainder = targetHeight - adjustedHeight;
+  const lastStretchRow = stretchRows[stretchRows.length - 1];
+
+  if (lastStretchRow && Math.abs(remainder) > 0.5) {
+    const rowHeight = lastStretchRow.getBoundingClientRect().height;
+    lastStretchRow.style.minHeight = `${rowHeight + remainder}px`;
+  }
 }
 
 function measureSnapshotBoardHeight(sourceApp) {
@@ -467,6 +478,10 @@ function measureSnapshotBoardHeight(sourceApp) {
   }
 
   return Math.ceil(board.getBoundingClientRect().height);
+}
+
+function querySnapshotRows(sourceApp) {
+  return Array.from(sourceApp.querySelectorAll(".tier-row"));
 }
 
 function drawAppBoxes(context, sourceApp) {
