@@ -6,9 +6,12 @@ const filters = Array.from(document.querySelectorAll("[data-filter]"));
 const zones = Array.from(document.querySelectorAll(".items, .pool-items"));
 const tierRows = Array.from(document.querySelectorAll(".tier-row"));
 const pool = document.querySelector(".pool");
-const SNAPSHOT_TABLE_WIDTH = 540;
-const SNAPSHOT_TABLE_HEIGHT = 960;
-const SNAPSHOT_WIDTH = SNAPSHOT_TABLE_WIDTH + 14;
+const SNAPSHOT_BASE_TABLE_WIDTH = 540;
+const SNAPSHOT_BASE_TABLE_HEIGHT = 960;
+const SNAPSHOT_ASPECT_WIDTH = 9;
+const SNAPSHOT_ASPECT_HEIGHT = 16;
+const SNAPSHOT_APP_HORIZONTAL_PADDING = 14;
+const SNAPSHOT_LAYOUT_PASSES = 8;
 const SNAPSHOT_SCALE = 2;
 
 const fruitNames = new Set([
@@ -328,8 +331,7 @@ function createSnapshotApp() {
 
   host.className = "snapshot-host";
   clone.classList.add("snapshot-target");
-  clone.style.width = `${SNAPSHOT_WIDTH}px`;
-  clone.querySelector(".tier-d")?.remove();
+  setSnapshotTableWidth(clone, SNAPSHOT_BASE_TABLE_WIDTH);
   clone.querySelector(".pool")?.remove();
   clone.querySelector(".tier-guide")?.remove();
   clone.querySelector(".app-header")?.remove();
@@ -347,26 +349,124 @@ function createSnapshotApp() {
 }
 
 function renderTierTableToCanvas(sourceApp) {
+  const snapshotSize = fitSnapshotToContent(sourceApp);
   const target = sourceApp.querySelector(".tier-board");
   const rect = target.getBoundingClientRect();
   const scale = SNAPSHOT_SCALE;
   const canvas = document.createElement("canvas");
   const context = canvas.getContext("2d");
 
-  canvas.width = SNAPSHOT_TABLE_WIDTH * scale;
-  canvas.height = SNAPSHOT_TABLE_HEIGHT * scale;
+  canvas.width = snapshotSize.width * scale;
+  canvas.height = snapshotSize.height * scale;
   context.scale(scale, scale);
   context.translate(-rect.left, -rect.top);
   context.fillStyle = "#ffffff";
-  context.fillRect(rect.left, rect.top, SNAPSHOT_TABLE_WIDTH, SNAPSHOT_TABLE_HEIGHT);
+  context.fillRect(rect.left, rect.top, snapshotSize.width, snapshotSize.height);
   context.beginPath();
-  context.rect(rect.left, rect.top, SNAPSHOT_TABLE_WIDTH, SNAPSHOT_TABLE_HEIGHT);
+  context.rect(rect.left, rect.top, snapshotSize.width, snapshotSize.height);
   context.clip();
 
   drawAppBoxes(context, sourceApp);
   drawAppText(context, sourceApp);
 
   return canvas;
+}
+
+function fitSnapshotToContent(sourceApp) {
+  let tableWidth = SNAPSHOT_BASE_TABLE_WIDTH;
+
+  for (let pass = 0; pass < SNAPSHOT_LAYOUT_PASSES; pass += 1) {
+    setSnapshotTableWidth(sourceApp, tableWidth);
+    clearSnapshotRowStretch(sourceApp);
+
+    const boardHeight = measureSnapshotBoardHeight(sourceApp);
+    const aspectHeight = Math.max(SNAPSHOT_BASE_TABLE_HEIGHT, Math.ceil(tableWidth * SNAPSHOT_ASPECT_HEIGHT / SNAPSHOT_ASPECT_WIDTH));
+
+    if (boardHeight <= aspectHeight) {
+      stretchLastSnapshotRow(sourceApp, aspectHeight);
+      return {
+        width: tableWidth,
+        height: aspectHeight
+      };
+    }
+
+    const nextWidth = Math.ceil(boardHeight * SNAPSHOT_ASPECT_WIDTH / SNAPSHOT_ASPECT_HEIGHT);
+    if (nextWidth <= tableWidth + 1) {
+      tableWidth += 2;
+    } else {
+      tableWidth = nextWidth;
+    }
+  }
+
+  setSnapshotTableWidth(sourceApp, tableWidth);
+  clearSnapshotRowStretch(sourceApp);
+
+  const boardHeight = measureSnapshotBoardHeight(sourceApp);
+  const aspectHeight = Math.max(
+    SNAPSHOT_BASE_TABLE_HEIGHT,
+    Math.ceil(tableWidth * SNAPSHOT_ASPECT_HEIGHT / SNAPSHOT_ASPECT_WIDTH),
+    boardHeight
+  );
+  const finalWidth = Math.ceil(aspectHeight * SNAPSHOT_ASPECT_WIDTH / SNAPSHOT_ASPECT_HEIGHT);
+
+  setSnapshotTableWidth(sourceApp, finalWidth);
+  clearSnapshotRowStretch(sourceApp);
+  const finalHeight = Math.max(SNAPSHOT_BASE_TABLE_HEIGHT, Math.ceil(finalWidth * SNAPSHOT_ASPECT_HEIGHT / SNAPSHOT_ASPECT_WIDTH));
+  stretchLastSnapshotRow(sourceApp, finalHeight);
+
+  return {
+    width: finalWidth,
+    height: finalHeight
+  };
+}
+
+function setSnapshotTableWidth(sourceApp, tableWidth) {
+  const appWidth = tableWidth + SNAPSHOT_APP_HORIZONTAL_PADDING;
+  sourceApp.style.width = `${appWidth}px`;
+
+  if (sourceApp.parentElement?.classList.contains("snapshot-host")) {
+    sourceApp.parentElement.style.width = `${appWidth}px`;
+  }
+}
+
+function clearSnapshotRowStretch(sourceApp) {
+  const lastRow = sourceApp.querySelector(".tier-d") || sourceApp.querySelector(".tier-row:last-child");
+
+  if (!lastRow) {
+    return;
+  }
+
+  lastRow.style.height = "";
+  lastRow.style.minHeight = "";
+}
+
+function stretchLastSnapshotRow(sourceApp, targetHeight) {
+  const board = sourceApp.querySelector(".tier-board");
+  const lastRow = sourceApp.querySelector(".tier-d") || sourceApp.querySelector(".tier-row:last-child");
+
+  if (!board || !lastRow) {
+    return;
+  }
+
+  const boardHeight = measureSnapshotBoardHeight(sourceApp);
+  const extraHeight = Math.max(0, targetHeight - boardHeight);
+
+  if (extraHeight <= 0) {
+    return;
+  }
+
+  const rowHeight = lastRow.getBoundingClientRect().height;
+  lastRow.style.minHeight = `${rowHeight + extraHeight}px`;
+}
+
+function measureSnapshotBoardHeight(sourceApp) {
+  const board = sourceApp.querySelector(".tier-board");
+
+  if (!board) {
+    return SNAPSHOT_BASE_TABLE_HEIGHT;
+  }
+
+  return Math.ceil(board.getBoundingClientRect().height);
 }
 
 function drawAppBoxes(context, sourceApp) {

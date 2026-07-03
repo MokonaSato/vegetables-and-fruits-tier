@@ -441,42 +441,43 @@ h1 {
 }
 
 .snapshot-target .tier-row {
-  grid-template-columns: 70px 1fr;
-  height: 239.5px;
-  min-height: 239.5px;
+  grid-template-columns: 64px 1fr;
+  min-height: 68px;
   overflow: hidden;
 }
 
 .snapshot-target .tier-s {
-  height: 210px;
-  min-height: 210px;
+  min-height: 68px;
 }
 
 .snapshot-target .tier-a {
-  height: 280px;
-  min-height: 280px;
+  min-height: 68px;
 }
 
 .snapshot-target .tier-b {
-  height: 250px;
-  min-height: 250px;
+  min-height: 68px;
 }
 
 .snapshot-target .tier-c {
-  height: 220px;
-  min-height: 220px;
+  min-height: 68px;
+}
+
+.snapshot-target .tier-d {
+  min-height: 68px;
 }
 
 .snapshot-target .items {
-  gap: 6px 7px;
-  padding: 9px 10px;
+  gap: 5px 6px;
+  align-content: flex-start;
+  min-height: 68px;
+  padding: 7px 8px;
   overflow: hidden;
 }
 
 .snapshot-target .chip {
-  min-height: 24px;
-  padding: 2px 7px;
-  font-size: 12px;
+  min-height: 22px;
+  padding: 2px 6px;
+  font-size: 11px;
 }
 
 .snapshot-target .tier-guide-title {
